@@ -87,9 +87,9 @@ az network firewall application-rule create  --firewall-name $FW_NAME --collecti
 # Create AKs Cluster
 az aks create --name ${KUBE_NAME} --resource-group ${KUBE_GROUP} --location ${LOCATION} --dns-name-prefix ${KUBE_NAME} \
     --kubernetes-version ${KUBE_VERSION} --vnet-subnet-id ${KUBE_AGENT_SUBNET_ID} --service-principal ${SERVICE_PRINCIPAL_ID} \
-    --client-secret ${SERVICE_PRINCIPAL_SECRET} --outbound-type userDefinedRouting --network-plugin kubenet --network-policy calico --nodepool-name basepool \
+    --client-secret ${SERVICE_PRINCIPAL_SECRET} --network-plugin kubenet --network-policy calico --nodepool-name basepool \
     --pod-cidr ${POD_CIDR} --service-cidr ${SVC_CIDR} --dns-service-ip ${DNS_SVC_IP} --min-count 3 --max-count 5 \
-    --enable-private-cluster --enable-pod-security-policy
+    --enable-pod-security-policy
 
 
 # Update default UDR for Kubenet to add default route to Azure Firewall
