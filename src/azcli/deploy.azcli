@@ -66,6 +66,10 @@ az network vnet subnet update --resource-group $VNET_GROUP --route-table $FW_ROU
 az network route-table route list --resource-group $VNET_GROUP --route-table-name $FW_ROUTE_TABLE_NAME
 
 # Create AKS required Network Rules
+az network firewall network-rule create --firewall-name $FW_NAME --collection-name "tunneltcp" --destination-addresses "*"  --destination-ports 9000 --name "allow network" \
+    --protocols "TCP" --resource-group $VNET_GROUP --source-addresses "*" --action "Allow" --description "aks tunnel tcp port" --priority 103
+az network firewall network-rule create --firewall-name $FW_NAME --collection-name "tunneludp" --destination-addresses "*"  --destination-ports 1194 --name "allow network" \
+    --protocols "UDP" --resource-group $VNET_GROUP --source-addresses "*" --action "Allow" --description "aks tunnel udp port" --priority 104
 az network firewall network-rule create --firewall-name $FW_NAME --collection-name "time" --destination-addresses "*"  --destination-ports 123 --name "allow network" \
     --protocols "UDP" --resource-group $VNET_GROUP --source-addresses "*" --action "Allow" --description "aks node time sync rule" --priority 101
 az network firewall network-rule create --firewall-name $FW_NAME --collection-name "dns" --destination-addresses "*"  --destination-ports 53 --name "allow network" \
@@ -76,13 +80,18 @@ az network firewall network-rule create --firewall-name $FW_NAME --collection-na
     --priority 110
 
 # Create AKS required Application Rules
+az network firewall application-rule create  --firewall-name $FW_NAME --collection-name "aksbase" --name "allow network" \
+    --protocols http=80 https=443 --source-addresses "*" --resource-group $VNET_GROUP --action "Allow" \
+    --target-fqdns "*.data.mcr.microsoft.com" "mcr.microsoft.com" "*.hcp.${LOCATION}.cx.aks.containerservice.azure.us" "*.tun.${LOCATION}.cx.aks.containerservice.azure.us" "management.azure.com" "login.microsoftonline.com" "acs-mirror.azureedge.net" \
+    --priority 100
+
 az network firewall application-rule create  --firewall-name $FW_NAME --collection-name "akstools" --name "allow network" \
     --protocols http=80 https=443 --source-addresses "*" --resource-group $VNET_GROUP --action "Allow" \
     --target-fqdns "dc.services.visualstudio.com" "*.opinsights.azure.com" "*.monitoring.azure.com" "gov-prod-policy-data.trafficmanager.net" "apt.dockerproject.org" "nvidia.github.io" \
     --priority 101
 az network firewall application-rule create  --firewall-name $FW_NAME --collection-name "osupdates" \
     --name "allow network" --protocols http=80 https=443 --source-addresses "*" --resource-group $VNET_GROUP --action "Allow" \
-    --target-fqdns "download.opensuse.org" "*.ubuntu.com" "packages.microsoft.com" "snapcraft.io" "api.snapcraft.io"  --priority 102
+    --target-fqdns "download.opensuse.org" "*.ubuntu.com" "packages.microsoft.com" "snapcraft.io" "api.snapcraft.io" "security.ubuntu.com" "azure.archive.ubuntu.com" "changelogs.ubuntu.com"  --priority 102
 
 # Create AKs Cluster
 az aks create --name ${KUBE_NAME} --resource-group ${KUBE_GROUP} --location ${LOCATION} --dns-name-prefix ${KUBE_NAME} \
