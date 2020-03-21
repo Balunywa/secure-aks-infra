@@ -16,13 +16,16 @@ resource "azurerm_virtual_network" "hubvnet" {
 }
 
 resource "azurerm_subnet" "azfwsubnet" {
-  for_each             = var.SUBNET_NAMES
+  for_each             = var.HUB_SUBNET_NAMES
   name                 = each.key
   virtual_network_name = azurerm_virtual_network.hubvnet.name
   resource_group_name  = var.HUB_RG_NAME
-  address_prefix       = each.key
+  address_prefix       = each.value
 }
 
 output "subnet_id" {
-  value = azurerm_subnet.azfwsubnet.id
+  value = [
+    for instance in azurerm_subnet.azfwsubnet :
+    instance.id
+  ]
 }

@@ -16,6 +16,10 @@ resource "azurerm_public_ip" "azfwpip" {
   }
 }
 
+output "azfw_pip" {
+  value = azurerm_public_ip.azfwpip.ip_address
+}
+
 resource "azurerm_firewall" "hubazfw" {
   name                = "hubazfw-${var.REGION}"
   location            = var.REGION
@@ -158,3 +162,10 @@ resource "azurerm_firewall_network_rule_collection" "netruleazfw-ports" {
   }
 }
 
+output "azfw_name" {
+  value = azurerm_firewall.hubazfw.name
+}
+
+output "azfw_PrivIP" {
+  value = azurerm_firewall.hubazfw.ip_configuration.0.private_ip_address
+}

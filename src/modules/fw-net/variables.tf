@@ -40,6 +40,7 @@ variable "HUB_RG_NAME" {
 }
 
 variable "HUB_VNET_ADDR_SPACE" {
+  type        = list
   description = "The address space that is used by the virtual network."
 }
 

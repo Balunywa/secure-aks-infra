@@ -39,12 +39,20 @@ variable "HUB_RG_NAME" {
   type = string
 }
 
-variable "HUB_SUBNET_ID" {
+variable "AZFW_NAME" {
   type = string
 }
-/*
-* AZFW
-*/
-variable "DOCKER_REGISTRY" {
+
+variable "AKS_SUBNET_ID" {
+  type        = string
+  description = "The name of the virtual network to create."
+}
+
+variable "AKS_RG_NAME" {
   type = string
+}
+
+variable "AZFW_PRIV_IP" {
+  type        = string
+  description = ""
 }
