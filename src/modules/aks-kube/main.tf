@@ -6,7 +6,7 @@ resource azurerm_kubernetes_cluster main {
       kubernetes_version
     ]
   }
-  
+
   name                = var.CLUSTER_ID
   location            = var.REGION
   resource_group_name = var.AKS_RG_NAME
@@ -35,7 +35,7 @@ resource azurerm_kubernetes_cluster main {
     name                = var.DEF_POOL_NAME
     node_count          = var.DEF_POOL_MIN
     enable_auto_scaling = var.ENABLE_CA_DEF_POOL
-    min_count           = var.DEF_POO1_MIN
+    min_count           = var.DEF_POOL_MIN
     max_count           = var.DEF_POOL_MAX
     vm_size             = var.DEF_POOL_NODE_SIZE
     os_disk_size_gb     = var.DEF_POOL_OS_DISK
@@ -76,7 +76,7 @@ resource azurerm_kubernetes_cluster main {
   #   }
 
   api_server_authorized_ip_ranges = [
-    ["${split(",", var.AUTH_IP_RANGES)}"],
+  "${var.AUTH_IP_RANGES}",
     "${var.AZFW_PIP}/32"
   ]
 
