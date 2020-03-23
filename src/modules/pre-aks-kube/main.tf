@@ -1,4 +1,14 @@
+
+resource "null_resource" "dependency_getter" {
+  triggers = {
+    my_dependencies = "${join(",", var.DEPENDENCY)}"
+  }
+}
+
 resource "azurerm_route_table" "vdmzudr" {
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
   name                = "${var.CLUSTER_ID}routetable"
   location            = var.REGION
   resource_group_name = var.AKS_RG_NAME
@@ -39,4 +49,14 @@ resource "azurerm_firewall_network_rule_collection" "netruleazfw-temp" {
       "TCP"
     ]
   }
+}
+
+resource "null_resource" "dependency_setter" {
+  depends_on = [
+    azurerm_firewall_network_rule_collection.netruleazfw-temp
+  ]
+}
+
+output "depended_on" {
+  value = "${null_resource.dependency_setter.id}-${timestamp()}"
 }

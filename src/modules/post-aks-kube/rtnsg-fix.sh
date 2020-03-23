@@ -7,7 +7,7 @@ az login --service-principal -u $AZ_CLIENT_ID -p $AZ_CLIENT_SECRET --tenant $AZ_
 echo "Configuring network..."
 
 echo "Retrieving AKS resource group, route table and network sucurity group..."
-AKS_MC_RG=$(az group list --query "[?starts_with(name, 'MC_${AKS_RG}')].name | [0]" --output tsv)
+AKS_MC_RG=$(az group list --query "[?starts_with(name, 'MC_${AKS_VNET_RG}')].name | [0]" --output tsv)
 
 echo "Resource group: ".$AKS_MC_RG
 

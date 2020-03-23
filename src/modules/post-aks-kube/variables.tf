@@ -47,3 +47,7 @@ variable "AZFW_RG_NAME" {
   type        = string
   description = ""
 }
+variable "DEPENDENCY" {
+  type        = list
+  description = ""
+}

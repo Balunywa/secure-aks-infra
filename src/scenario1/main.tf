@@ -36,6 +36,7 @@ module "fw-net" {
   REGION              = var.REGION
   HUB_VNET_ADDR_SPACE = var.HUB_VNET_ADDR_SPACE
   HUB_SUBNET_NAMES    = var.HUB_SUBNET_NAMES
+  DEPENDENCY          = [azurerm_resource_group.hubrg.name]
 }
 
 module "azfw" {
@@ -52,6 +53,7 @@ module "azfw" {
   REGION          = var.REGION
   HUB_SUBNET_ID   = module.fw-net.subnet_id[0]
   DOCKER_REGISTRY = var.DOCKER_REGISTRY
+  DEPENDENCY      = [module.fw-net.depended_on]
 }
 
 resource "azurerm_resource_group" "aksrg" {
@@ -89,6 +91,19 @@ module "aks-net" {
   AKS_VNET_CIDR    = var.AKS_VNET_CIDR
   AKS_SUBNET_NAMES = var.AKS_SUBNET_NAMES
   DNS_SERVERS      = var.DNS_SERVERS
+  DEPENDENCY       = [azurerm_resource_group.aksrg.name]
+}
+
+module "vnet-peer" {
+  source = "../modules/vnet-peer"
+
+  HUB_RG_NAME   = azurerm_resource_group.hubrg.name
+  HUB_VNET_NAME = module.fw-net.hub_vnet_name
+  AKS_VNET_ID   = module.aks-net.aks_vnet_id
+  AKS_RG_NAME   = azurerm_resource_group.aksrg.name
+  AKS_VNET_NAME = module.aks-net.aks_vnet_name
+  HUB_VNET_ID   = module.fw-net.hub_vnet_id
+  DEPENDENCY    = [module.aks-net.depended_on, module.fw-net.depended_on]
 }
 
 module "pre-aks-kube" {
@@ -108,6 +123,7 @@ module "pre-aks-kube" {
   PLATFORM      = var.PLATFORM
   SPONSOR_INFO  = var.SPONSOR_INFO
   REGION        = var.REGION
+  DEPENDENCY    = [module.vnet-peer.depended_on]
 }
 
 module "aks-kube" {
@@ -144,19 +160,21 @@ module "aks-kube" {
   PLATFORM     = var.PLATFORM
   SPONSOR_INFO = var.SPONSOR_INFO
   REGION       = var.REGION
+  DEPENDENCY   = [module.vnet-peer.depended_on,module.pre-aks-kube.depended_on, azurerm_resource_group.aksrg.name]
 }
 
 module "post-aks-kube" {
-  source  = "../modules/post-aks-kube"
+  source = "../modules/post-aks-kube"
 
-  AKS_RG_NAME = azurerm_resource_group.aksrg.name
-  AKS_VNET_NAME = var.AKS_VNET_NAME
-  AKS_SUBNET_NAME = 
-  AZFW_PRIVIP = module.azfw.azfw_PrivIP
-  TF_CLIENT_SECRET =
-  TF_CLIENT_ID =
-  TF_TENANT_ID =
-  AKS_API_FQDN =
-  AZFW_NAME =
-  AZFW_RG_NAME =
+  AKS_RG_NAME      = azurerm_resource_group.aksrg.name
+  AKS_VNET_NAME    = var.AKS_VNET_NAME
+  AKS_SUBNET_NAME  = module.aks-net.subnet_name[0]
+  AZFW_PRIVIP      = module.azfw.azfw_PrivIP
+  TF_CLIENT_SECRET = var.TFUSER_CLIENT_SECRET
+  TF_CLIENT_ID     = var.TFUSER_CLIENT_ID
+  TF_TENANT_ID     = var.TENANT_ID
+  AKS_API_FQDN     = module.aks-kube.api_fqdn
+  AZFW_NAME        = module.azfw.azfw_name
+  AZFW_RG_NAME     = azurerm_resource_group.hubrg.name
+  DEPENDENCY       = [module.aks-kube.depended_on]
 }

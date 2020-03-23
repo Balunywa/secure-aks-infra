@@ -56,3 +56,8 @@ variable "AZFW_PRIV_IP" {
   type        = string
   description = ""
 }
+
+variable "DEPENDENCY" {
+  type        = list
+  description = ""
+}

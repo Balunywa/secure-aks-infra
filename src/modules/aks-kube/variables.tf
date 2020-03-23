@@ -128,3 +128,8 @@ variable "AZFW_PIP" {
   type        = string
   description = ""
 }
+
+variable "DEPENDENCY" {
+  type        = list
+  description = ""
+}

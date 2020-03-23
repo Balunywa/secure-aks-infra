@@ -58,3 +58,8 @@ variable "DNS_SERVERS" {
   type        = list
   description = ""
 }
+
+variable "DEPENDENCY" {
+  type        = list
+  description = ""
+}

@@ -1,4 +1,13 @@
+resource "null_resource" "dependency_getter" {
+  triggers = {
+    my_dependencies = "${join(",", var.DEPENDENCY)}"
+  }
+}
+
 resource "azurerm_public_ip" "azfwpip" {
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
   name                = "azfwpip"
   location            = var.REGION
   resource_group_name = var.HUB_RG_NAME
@@ -21,6 +30,9 @@ output "azfw_pip" {
 }
 
 resource "azurerm_firewall" "hubazfw" {
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
   name                = "hubazfw-${var.REGION}"
   location            = var.REGION
   resource_group_name = var.HUB_RG_NAME
@@ -43,6 +55,9 @@ resource "azurerm_firewall" "hubazfw" {
 }
 
 resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
   name                = "AzureFirewallAppCollection"
   azure_firewall_name = azurerm_firewall.hubazfw.name
   resource_group_name = var.HUB_RG_NAME
@@ -121,6 +136,9 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
 }
 
 resource "azurerm_firewall_network_rule_collection" "netruleazfw-ports" {
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
   name                = "AzureFirewallNetCollection-ports"
   azure_firewall_name = azurerm_firewall.hubazfw.name
   resource_group_name = var.HUB_RG_NAME
@@ -168,4 +186,15 @@ output "azfw_name" {
 
 output "azfw_PrivIP" {
   value = azurerm_firewall.hubazfw.ip_configuration.0.private_ip_address
+}
+
+resource "null_resource" "dependency_setter" {
+  depends_on = [
+    azurerm_firewall_network_rule_collection.netruleazfw-ports,
+    azurerm_firewall_application_rule_collection.appruleazfw
+  ]
+}
+
+output "depended_on" {
+  value = "${null_resource.dependency_setter.id}-${timestamp()}"
 }

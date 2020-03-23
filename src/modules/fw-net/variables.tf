@@ -48,3 +48,8 @@ variable "HUB_SUBNET_NAMES" {
   description = "A map of public subnets inside the vNet subnetName=subnetcidr should be the pattern used."
   type        = map
 }
+
+variable "DEPENDENCY" {
+  type        = list
+  description = ""
+}

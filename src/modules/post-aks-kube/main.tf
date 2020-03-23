@@ -1,35 +1,43 @@
+resource "null_resource" "dependency_getter" {
+  triggers = {
+    my_dependencies = "${join(",", var.DEPENDENCY)}"
+  }
+}
+
 resource "null_resource" "kubenet_udr" {
-
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
   provisioner "local-exec" {
-    command = "./rtnsg-fix.sh"
+    command = "../modules/post-aks-kube/rtnsg-fix.sh"
 
-    environment {
+    environment = {
       AKS_VNET_RG      = var.AKS_RG_NAME
       AKS_VNET_NAME    = var.AKS_VNET_NAME
       AKS_SUBNET_NAME  = var.AKS_SUBNET_NAME
       AZFW_INT_IP      = var.AZFW_PRIVIP
-      AZ_CLIENT_ID     = var.TF_CLIENT_SECRET
-      AZ_CLIENT_SECRET = var.TF_CLIENT_ID
+      AZ_CLIENT_ID     = var.TF_CLIENT_ID
+      AZ_CLIENT_SECRET = var.TF_CLIENT_SECRET
       AZ_TENANT_ID     = var.TF_TENANT_ID
     }
   }
 
-  provisioner "local-exec" {
-    when    = "destroy"
-    command = "./rtnsg-rm.sh"
+  # provisioner "local-exec" {
+  #   when    = destroy
+  #   command = "./rtnsg-rm.sh"
 
-    environment {
-      AKS_VNET_RG      = var.AKS_RG_NAME
-      AKS_VNET_NAME    = var.AKS_VNET_NAME
-      AKS_SUBNET_NAME  = var.AKS_SUBNET_NAME
-      AZ_CLIENT_ID     = var.TF_CLIENT_SECRET
-      AZ_CLIENT_SECRET = var.TF_CLIENT_ID
-      AZ_TENANT_ID     = var.TF_TENANT_ID
-    }
-  }
+  #   environment = {
+  #     AKS_VNET_RG      = var.AKS_RG_NAME
+  #     AKS_VNET_NAME    = var.AKS_VNET_NAME
+  #     AKS_SUBNET_NAME  = var.AKS_SUBNET_NAME
+  #     AZ_CLIENT_ID     = var.TF_CLIENT_SECRET
+  #     AZ_CLIENT_SECRET = var.TF_CLIENT_ID
+  #     AZ_TENANT_ID     = var.TF_TENANT_ID
+  #   }
+  # }
 }
 
-data "dns_a_record_set" "apiIP" {
+data dns_a_record_set apiIP {
   host = var.AKS_API_FQDN
 }
 
@@ -41,7 +49,7 @@ resource "azurerm_firewall_network_rule_collection" "netruleazfw" {
   action              = "Allow"
 
   depends_on = [
-    "data.dns_a_record_set.apiIP"
+    data.dns_a_record_set.apiIP
   ]
   rule {
     name = "AllowAPIServer"
@@ -60,3 +68,13 @@ resource "azurerm_firewall_network_rule_collection" "netruleazfw" {
   }
 }
 
+resource "null_resource" "dependency_setter" {
+  depends_on = [
+    null_resource.kubenet_udr,
+    azurerm_firewall_network_rule_collection.netruleazfw
+  ]
+}
+
+output "depended_on" {
+  value = "${null_resource.dependency_setter.id}-${timestamp()}"
+}

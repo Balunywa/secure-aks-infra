@@ -48,3 +48,8 @@ variable "HUB_SUBNET_ID" {
 variable "DOCKER_REGISTRY" {
   type = string
 }
+
+variable "DEPENDENCY" {
+  type        = list
+  description = ""
+}

@@ -1,4 +1,13 @@
+resource "null_resource" "dependency_getter" {
+  triggers = {
+    my_dependencies = "${join(",", var.DEPENDENCY)}"
+  }
+}
+
 resource "azurerm_virtual_network" "hubvnet" {
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
   name                = "hubvnet"
   address_space       = var.HUB_VNET_ADDR_SPACE
   location            = var.REGION
@@ -15,6 +24,16 @@ resource "azurerm_virtual_network" "hubvnet" {
   }
 }
 
+output "hub_vnet_name" {
+  value       = azurerm_virtual_network.hubvnet.name
+  description = ""
+}
+
+output "hub_vnet_id" {
+  value       = azurerm_virtual_network.hubvnet.id
+  description = ""
+}
+
 resource "azurerm_subnet" "azfwsubnet" {
   for_each             = var.HUB_SUBNET_NAMES
   name                 = each.key
@@ -28,4 +47,14 @@ output "subnet_id" {
     for instance in azurerm_subnet.azfwsubnet :
     instance.id
   ]
+}
+
+resource "null_resource" "dependency_setter" {
+  depends_on = [
+    azurerm_subnet.azfwsubnet
+  ]
+}
+
+output "depended_on" {
+  value = "${null_resource.dependency_setter.id}-${timestamp()}"
 }

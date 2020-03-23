@@ -1,8 +1,14 @@
-provider "azurerm" {
-  features {}
+
+resource "null_resource" "dependency_getter" {
+  triggers = {
+    my_dependencies = "${join(",", var.DEPENDENCY)}"
+  }
 }
 
 resource "azurerm_virtual_network" "aksvnet" {
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
   name                = var.AKS_VNET_NAME
   location            = var.REGION
   address_space       = var.AKS_VNET_CIDR
@@ -20,6 +26,17 @@ resource "azurerm_virtual_network" "aksvnet" {
   }
 }
 
+output "aks_vnet_id" {
+  value       = azurerm_virtual_network.aksvnet.id
+  description = ""
+}
+
+output "aks_vnet_name" {
+  value       = azurerm_virtual_network.aksvnet.name
+  description = ""
+}
+
+
 resource "azurerm_subnet" "akssubnet" {
   for_each             = var.AKS_SUBNET_NAMES
   name                 = each.key
@@ -33,4 +50,21 @@ output "subnet_id" {
     for instance in azurerm_subnet.akssubnet :
     instance.id
   ]
+}
+
+output "subnet_name" {
+  value = [
+    for instance in azurerm_subnet.akssubnet :
+    instance.name
+  ]
+}
+
+resource "null_resource" "dependency_setter" {
+  depends_on = [
+    azurerm_subnet.akssubnet
+  ]
+}
+
+output "depended_on" {
+  value = "${null_resource.dependency_setter.id}-${timestamp()}"
 }

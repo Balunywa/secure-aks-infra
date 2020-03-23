@@ -1,3 +1,13 @@
+locals {
+  api_server_authList = concat(list("${var.AZFW_PIP}/32"), split(",", var.AUTH_IP_RANGES))
+}
+
+resource "null_resource" "dependency_getter" {
+  triggers = {
+    my_dependencies = "${join(",", var.DEPENDENCY)}"
+  }
+}
+
 resource azurerm_kubernetes_cluster main {
   lifecycle {
     ignore_changes = [
@@ -6,7 +16,9 @@ resource azurerm_kubernetes_cluster main {
       kubernetes_version
     ]
   }
-
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
   name                = var.CLUSTER_ID
   location            = var.REGION
   resource_group_name = var.AKS_RG_NAME
@@ -75,10 +87,22 @@ resource azurerm_kubernetes_cluster main {
   #     client_secret = azuread_service_principal_password.akssp.value
   #   }
 
-  api_server_authorized_ip_ranges = [
-  "${var.AUTH_IP_RANGES}",
-    "${var.AZFW_PIP}/32"
-  ]
+  api_server_authorized_ip_ranges = local.api_server_authList
 
   enable_pod_security_policy = "true"
+}
+
+output "api_fqdn" {
+  value       = azurerm_kubernetes_cluster.main.fqdn
+  description = "The FQDN of the Azure Kubernetes Managed Cluster"
+}
+
+resource "null_resource" "dependency_setter" {
+  depends_on = [
+    azurerm_kubernetes_cluster.main
+  ]
+}
+
+output "depended_on" {
+  value = "${null_resource.dependency_setter.id}-${timestamp()}"
 }
