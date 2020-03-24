@@ -73,10 +73,11 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       "*.tun.${var.REGION}.azmk8s.io", #This address is the API server endpoint. Replace <location> with the region where your AKS cluster is deployed.
       "mcr.microsoft.com",             #This address is required to access images in Microsoft Container Registry (MCR).
       "*.data.mcr.microsoft.com",      #This address is required for MCR storage backed by the Azure content delivery network (CDN).
+      "*.cdn.mscr.io",
+      "packages.microsoft.com",
+      "acs-mirror.azureedge.net",
       "login.microsoftonline.com",
       "management.azure.com", #This address is required for Kubernetes GET/PUT operations.
-      "api.snapcraft.io",     #This address is required to install Snap packages on Linux nodes.
-      "*.docker.io",
     ] #This address is required to pull required container images for the tunnel front.
 
     protocol {
@@ -100,17 +101,16 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
     }
   }
   rule {
-    name = "aks_support_rules"
+    name = "azmon_support_rules"
     source_addresses = [
       "*",
     ]
     target_fqdns = [
-      "packages.microsoft.com",                  #This address is the Microsoft packages repository used for cached apt-get operations.
-      "gov-prod-policy-data.trafficmanager.net", #This address is used for correct operation of Azure Policy (currently in preview in AKS).
-      "nvidia.github.io",                        #This address is used for correct driver installation and operation on GPU-based nodes.
-      "acs-mirror.azureedge.net",
-      "usage.projectcalico.org",
-      "apt.dockerproject.org",
+      "dc.services.visualstudio.com", #This address is used for correct operation of Azure Policy (currently in preview in AKS).
+      "*.ods.opinsights.azure.com",                        #This address is used for correct driver installation and operation on GPU-based nodes.
+      "*.oms.opinsights.azure.com",
+      "*.microsoftonline.com",
+      "*.monitoring.azure.com",
     ] #This address is used for correct driver installation and operation on GPU-based nodes.
 
     protocol {
@@ -124,8 +124,9 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       "*",
     ]
     target_fqdns = [
-      "*.ubuntu.com", #This address lets the Linux cluster nodes download the required security patches and updates.
-      "api.snapcraft.io",
+      "security.ubuntu.com", #This address lets the Linux cluster nodes download the required security patches and updates.
+      "azure.archive.ubuntu.com",
+      "changelogs.ubuntu.com"
     ] #This address is required to install Snap packages on Linux nodes. Uses both port 80 and 443
 
     protocol {
@@ -133,6 +134,23 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       type = "Http"
     }
   }
+  # rule {
+  #   name = "gpu_support_rules"
+  #   source_addresses = [
+  #     "*",
+  #   ]
+  #   target_fqdns = [
+  #                      #This address is the Microsoft packages repository used for cached apt-get operations.
+  #     "nvidia.github.io",                        #This address is used for correct driver installation and operation on GPU-based nodes.
+  #     "us.download.nvidia.com",
+  #     "apt.dockerproject.org",
+  #   ] #This address is used for correct driver installation and operation on GPU-based nodes.
+
+  #   protocol {
+  #     port = "443"
+  #     type = "Https"
+  #   }
+  # }
 }
 
 resource "azurerm_firewall_network_rule_collection" "netruleazfw-ports" {
@@ -151,6 +169,7 @@ resource "azurerm_firewall_network_rule_collection" "netruleazfw-ports" {
     ]
     destination_ports = [
       "9000",
+      "22"
     ] #TCP Port used by TunnelFront
 
     destination_addresses = [
@@ -168,7 +187,7 @@ resource "azurerm_firewall_network_rule_collection" "netruleazfw-ports" {
     destination_ports = [
       "53",  #Port used for DNS
       "123", #UDP port used for time services
-      "1149" #UDP for Tunnel
+      "1194" #UDP for Tunnel
     ]
 
     destination_addresses = [
