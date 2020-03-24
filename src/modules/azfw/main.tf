@@ -130,7 +130,7 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       "security.ubuntu.com", 
       "azure.archive.ubuntu.com",
       "changelogs.ubuntu.com"
-
+    ]
     protocol {
       port = "80"
       type = "Http"
