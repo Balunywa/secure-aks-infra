@@ -172,4 +172,18 @@ variable "K8S_SP_CLIENT_ID" {
 variable "K8S_SP_CLIENT_SECRET" {
   type = string
 }
-
+/*
+* NODEPOOLS
+*/
+variable "NODEPOOL_DEFS" {
+  type = map(object({
+    name             = string
+    node_count       = string
+    enable_autoscale = bool
+    min_count        = string
+    max_count        = string
+    vm_size          = string
+    node_disk_size   = string
+  }))
+  description = ""
+}

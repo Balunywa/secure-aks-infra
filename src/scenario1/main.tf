@@ -160,7 +160,20 @@ module "aks-kube" {
   PLATFORM     = var.PLATFORM
   SPONSOR_INFO = var.SPONSOR_INFO
   REGION       = var.REGION
-  DEPENDENCY   = [module.vnet-peer.depended_on,module.pre-aks-kube.depended_on, azurerm_resource_group.aksrg.name]
+  DEPENDENCY = [module.vnet-peer.depended_on,
+    module.pre-aks-kube.depended_on,
+    module.azfw.depended_on,
+  azurerm_resource_group.aksrg.name]
+}
+
+module "aks-nodepool" {
+  source = "../modules/aks-nodepool"
+
+  AKS_ID        = module.aks-kube.aks_id
+  AKS_SUBNET_ID = module.aks-net.subnet_id[0]
+  NODEPOOL_DEFS = var.NODEPOOL_DEFS
+  DEPENDENCY    = [module.aks-kube.depended_on]
+
 }
 
 module "post-aks-kube" {

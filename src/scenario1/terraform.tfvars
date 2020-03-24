@@ -1,4 +1,4 @@
-CLUSTER_ID          = "tst1"
+CLUSTER_ID          = "egresstst"
 COST_CENTER         = "RC8765"
 DEPLOY_TYPE         = "AKS_WCNP"
 ENVIRONMENT         = "PROD"
@@ -33,3 +33,23 @@ DEF_POOL_NAME      = "istiopool"
 DEF_POOL_MIN       = "1"
 DEF_POOL_MAX       = "5"
 ENABLE_CA_DEF_POOL = "true"
+NODEPOOL_DEFS = {
+  nodepool1 = {
+    name             = "workerpool"
+    node_count       = "3"
+    enable_autoscale = true
+    min_count        = "3"
+    max_count        = "5"
+    vm_size          = "Standard_D2s_v3"
+    node_disk_size   = "128"
+  },
+  nodepool2 = {
+    name             = "coreinfpool"
+    node_count       = "3"
+    enable_autoscale = true
+    min_count        = "3"
+    max_count        = "5"
+    vm_size          = "Standard_D2s_v3"
+    node_disk_size   = "128"
+  }
+}

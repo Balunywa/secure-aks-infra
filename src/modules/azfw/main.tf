@@ -29,6 +29,8 @@ output "azfw_pip" {
   value = azurerm_public_ip.azfwpip.ip_address
 }
 
+
+
 resource "azurerm_firewall" "hubazfw" {
   depends_on = [
     null_resource.dependency_getter,
@@ -69,16 +71,17 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       "*",
     ]
     target_fqdns = [
-      "*.hcp.${var.REGION}.azmk8s.io", #This address is the API server endpoint. Replace <location> with the region where your AKS cluster is deployed.
-      "*.tun.${var.REGION}.azmk8s.io", #This address is the API server endpoint. Replace <location> with the region where your AKS cluster is deployed.
-      "mcr.microsoft.com",             #This address is required to access images in Microsoft Container Registry (MCR).
-      "*.data.mcr.microsoft.com",      #This address is required for MCR storage backed by the Azure content delivery network (CDN).
+      "*.hcp.${var.REGION}.azmk8s.io",
+      "*.tun.${var.REGION}.azmk8s.io", 
+      "mcr.microsoft.com",             
+      "*.data.mcr.microsoft.com",     
       "*.cdn.mscr.io",
       "packages.microsoft.com",
       "acs-mirror.azureedge.net",
       "login.microsoftonline.com",
-      "management.azure.com", #This address is required for Kubernetes GET/PUT operations.
-    ] #This address is required to pull required container images for the tunnel front.
+      "management.azure.com",
+      "*.blob.core.windows.net"
+    ]                         
 
     protocol {
       port = "443"
@@ -93,7 +96,7 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
     target_fqdns = [
       var.DOCKER_REGISTRY, #FQDN for Private registry
       "*.cloudflare.docker.com",
-    ] #FQDN used by docker.io for CDN of images.
+    ]
 
     protocol {
       port = "443"
@@ -106,12 +109,12 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       "*",
     ]
     target_fqdns = [
-      "dc.services.visualstudio.com", #This address is used for correct operation of Azure Policy (currently in preview in AKS).
-      "*.ods.opinsights.azure.com",                        #This address is used for correct driver installation and operation on GPU-based nodes.
+      "dc.services.visualstudio.com", 
+      "*.ods.opinsights.azure.com",
       "*.oms.opinsights.azure.com",
       "*.microsoftonline.com",
       "*.monitoring.azure.com",
-    ] #This address is used for correct driver installation and operation on GPU-based nodes.
+    ]
 
     protocol {
       port = "443"
@@ -124,10 +127,9 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       "*",
     ]
     target_fqdns = [
-      "security.ubuntu.com", #This address lets the Linux cluster nodes download the required security patches and updates.
+      "security.ubuntu.com", 
       "azure.archive.ubuntu.com",
       "changelogs.ubuntu.com"
-    ] #This address is required to install Snap packages on Linux nodes. Uses both port 80 and 443
 
     protocol {
       port = "80"
@@ -140,11 +142,10 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
   #     "*",
   #   ]
   #   target_fqdns = [
-  #                      #This address is the Microsoft packages repository used for cached apt-get operations.
-  #     "nvidia.github.io",                        #This address is used for correct driver installation and operation on GPU-based nodes.
+  #     "nvidia.github.io",
   #     "us.download.nvidia.com",
   #     "apt.dockerproject.org",
-  #   ] #This address is used for correct driver installation and operation on GPU-based nodes.
+  #   ]
 
   #   protocol {
   #     port = "443"
@@ -207,10 +208,49 @@ output "azfw_PrivIP" {
   value = azurerm_firewall.hubazfw.ip_configuration.0.private_ip_address
 }
 
+resource "azurerm_log_analytics_workspace" "azfwlogs" {
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
+  name                = "hubazfw-logs"
+  location            = var.REGION
+  resource_group_name = var.HUB_RG_NAME
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_monitor_diagnostic_setting" "azfwlogs" {
+  depends_on = [
+    null_resource.dependency_getter,
+  ]
+  name                       = "azfw_debug_logs"
+  target_resource_id         = azurerm_firewall.hubazfw.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.azfwlogs.id
+
+  log {
+    category = "AzureFirewallApplicationRule"
+    enabled  = true
+
+    retention_policy {
+      enabled = false
+    }
+  }
+  log {
+    category = "AzureFirewallNetworkRule"
+    enabled  = true
+
+    retention_policy {
+      enabled = false
+    }
+  }
+
+}
+
 resource "null_resource" "dependency_setter" {
   depends_on = [
     azurerm_firewall_network_rule_collection.netruleazfw-ports,
-    azurerm_firewall_application_rule_collection.appruleazfw
+    azurerm_firewall_application_rule_collection.appruleazfw,
+    azurerm_monitor_diagnostic_setting.azfwlogs
   ]
 }
 

@@ -97,6 +97,11 @@ output "api_fqdn" {
   description = "The FQDN of the Azure Kubernetes Managed Cluster"
 }
 
+output "aks_id" {
+  value       = azurerm_kubernetes_cluster.main.id
+  description = "The FQDN of the Azure Kubernetes Managed Cluster"
+}
+
 resource "null_resource" "dependency_setter" {
   depends_on = [
     azurerm_kubernetes_cluster.main
