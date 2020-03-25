@@ -1,4 +1,4 @@
-CLUSTER_ID          = "badegress"
+CLUSTER_ID          = "egresstst"
 COST_CENTER         = "RC8765"
 DEPLOY_TYPE         = "AKS_WCNP"
 ENVIRONMENT         = "PROD"

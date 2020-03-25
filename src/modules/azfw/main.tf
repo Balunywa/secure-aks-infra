@@ -4,11 +4,16 @@ resource "null_resource" "dependency_getter" {
   }
 }
 
+resource random_integer uuid {
+  min = 01
+  max = 99
+}
+
 resource "azurerm_public_ip" "azfwpip" {
   depends_on = [
     null_resource.dependency_getter,
   ]
-  name                = "azfwpip"
+  name                = "azfwpip${random_integer.uuid.result}"
   location            = var.REGION
   resource_group_name = var.HUB_RG_NAME
   allocation_method   = "Static"
@@ -35,7 +40,7 @@ resource "azurerm_firewall" "hubazfw" {
   depends_on = [
     null_resource.dependency_getter,
   ]
-  name                = "hubazfw-${var.REGION}"
+  name                = "hubazfw${random_integer.uuid.result}-${var.REGION}"
   location            = var.REGION
   resource_group_name = var.HUB_RG_NAME
 
@@ -80,7 +85,7 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       "acs-mirror.azureedge.net",
       "login.microsoftonline.com",
       "management.azure.com",
-      "*.blob.core.windows.net"
+      "upstreamartifacts.blob.core.windows.net" #TODO Eddie V. 3/25/2020 - Remove when AKS Patch is applied for incorrect URL
     ]                         
 
     protocol {
@@ -95,7 +100,6 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
     ]
     target_fqdns = [
       var.DOCKER_REGISTRY, #FQDN for Private registry
-      "*.cloudflare.docker.com",
     ]
 
     protocol {
@@ -212,7 +216,7 @@ resource "azurerm_log_analytics_workspace" "azfwlogs" {
   depends_on = [
     null_resource.dependency_getter,
   ]
-  name                = "hubazfw-logs"
+  name                = "hubazfw-logs${random_integer.uuid.result}"
   location            = var.REGION
   resource_group_name = var.HUB_RG_NAME
   sku                 = "PerGB2018"
@@ -223,7 +227,7 @@ resource "azurerm_monitor_diagnostic_setting" "azfwlogs" {
   depends_on = [
     null_resource.dependency_getter,
   ]
-  name                       = "azfw_debug_logs"
+  name                       = "azfw${random_integer.uuid.result}-debug_logs"
   target_resource_id         = azurerm_firewall.hubazfw.id
   log_analytics_workspace_id = azurerm_log_analytics_workspace.azfwlogs.id
 
