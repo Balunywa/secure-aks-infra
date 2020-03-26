@@ -1,4 +1,4 @@
-# {{Project X}} Documentation
+# Secure AKS Infrastructure Documentation
 
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 
