@@ -13,7 +13,7 @@ variable "AKS_SUBNET_NAME" {
   description = ""
 }
 
-variable "AZFW_PRIVIP" {
+variable "AZFW_PRIV_IP" {
   type        = string
   description = ""
 }
@@ -49,5 +49,10 @@ variable "AZFW_RG_NAME" {
 }
 variable "DEPENDENCY" {
   type        = list
+  description = ""
+}
+
+variable "CLUSTER_ID" {
+  type        = string
   description = ""
 }

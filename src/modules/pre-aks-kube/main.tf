@@ -5,6 +5,11 @@ resource "null_resource" "dependency_getter" {
   }
 }
 
+resource random_integer uuid {
+  min = 400
+  max = 450
+}
+
 resource "azurerm_route_table" "vdmzudr" {
   depends_on = [
     null_resource.dependency_getter,
@@ -28,10 +33,10 @@ resource "azurerm_subnet_route_table_association" "vdmzudr" {
 }
 
 resource "azurerm_firewall_network_rule_collection" "netruleazfw-temp" {
-  name                = "AzureFirewallNetCollection-API-TEMP"
+  name                = "AzureFirewallNetCollection-${var.CLUSTER_ID}API-TEMP"
   azure_firewall_name = var.AZFW_NAME
   resource_group_name = var.HUB_RG_NAME
-  priority            = 210
+  priority            = random_integer.uuid.result
   action              = "Allow"
 
   rule {
