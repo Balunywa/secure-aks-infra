@@ -15,7 +15,7 @@ resource "null_resource" "kubenet_udr" {
       AKS_VNET_RG      = var.AKS_RG_NAME
       AKS_VNET_NAME    = var.AKS_VNET_NAME
       AKS_SUBNET_NAME  = var.AKS_SUBNET_NAME
-      AZFW_INT_IP      = var.AZFW_PRIVIP
+      AZFW_INT_IP      = var.AZFW_PRIV_IP
       AZ_CLIENT_ID     = var.TF_CLIENT_ID
       AZ_CLIENT_SECRET = var.TF_CLIENT_SECRET
       AZ_TENANT_ID     = var.TF_TENANT_ID
@@ -41,11 +41,16 @@ data dns_a_record_set apiIP {
   host = var.AKS_API_FQDN
 }
 
+resource random_integer priorityid {
+  min = 205
+  max = 350
+}
+
 resource "azurerm_firewall_network_rule_collection" "netruleazfw" {
-  name                = "AzureFirewallNetCollection-API"
+  name                = "AzureFirewallNetCollection-API${var.CLUSTER_ID}"
   azure_firewall_name = var.AZFW_NAME
   resource_group_name = var.AZFW_RG_NAME
-  priority            = 201
+  priority            = random_integer.priorityid.result
   action              = "Allow"
 
   depends_on = [

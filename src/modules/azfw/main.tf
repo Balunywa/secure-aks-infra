@@ -77,16 +77,16 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
     ]
     target_fqdns = [
       "*.hcp.${var.REGION}.azmk8s.io",
-      "*.tun.${var.REGION}.azmk8s.io", 
-      "mcr.microsoft.com",             
-      "*.data.mcr.microsoft.com",     
+      "*.tun.${var.REGION}.azmk8s.io",
+      "mcr.microsoft.com",
+      "*.data.mcr.microsoft.com",
       "*.cdn.mscr.io",
       "packages.microsoft.com",
       "acs-mirror.azureedge.net",
       "login.microsoftonline.com",
       "management.azure.com",
       "upstreamartifacts.blob.core.windows.net" #TODO Eddie V. 3/25/2020 - Remove when AKS Patch is applied for incorrect URL
-    ]                         
+    ]
 
     protocol {
       port = "443"
@@ -113,7 +113,7 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       "*",
     ]
     target_fqdns = [
-      "dc.services.visualstudio.com", 
+      "dc.services.visualstudio.com",
       "*.ods.opinsights.azure.com",
       "*.oms.opinsights.azure.com",
       "*.microsoftonline.com",
@@ -131,7 +131,7 @@ resource "azurerm_firewall_application_rule_collection" "appruleazfw" {
       "*",
     ]
     target_fqdns = [
-      "security.ubuntu.com", 
+      "security.ubuntu.com",
       "azure.archive.ubuntu.com",
       "changelogs.ubuntu.com"
     ]

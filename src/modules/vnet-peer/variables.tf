@@ -32,3 +32,6 @@ variable "DEPENDENCY" {
   type        = list
   description = ""
 }
+
+variable "CLUSTER_ID" {
+}

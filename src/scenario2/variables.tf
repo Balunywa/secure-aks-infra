@@ -49,14 +49,25 @@ variable "SPONSOR_INFO" {
 /*
 * AZFW
 */
-variable "HUB_VNET_ADDR_SPACE" {
-  type        = list(string)
-  description = "The address space that is used by the virtual network."
+
+variable "HUB_VNET_NAME" {
+  type        = string
+  description = ""
 }
 
-variable "HUB_SUBNET_NAMES" {
-  description = "A map of public subnets inside the vNet subnetName=subnetcidr should be the pattern used."
-  type        = map(string)
+variable "HUB_RG_NAME" {
+  type        = string
+  description = ""
+}
+
+variable "AZFW_NAME" {
+  type        = string
+  description = ""
+}
+
+variable "AZFW_PIP_NAME" {
+  type        = string
+  description = ""
 }
 /*
 * AZFW

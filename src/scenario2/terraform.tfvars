@@ -1,21 +1,21 @@
-CLUSTER_ID          = "egresstst"
-COST_CENTER         = "RC8765"
-DEPLOY_TYPE         = "AKS_WCNP"
-ENVIRONMENT         = "PROD"
-NOTIFY_LIST         = "mngrs@microsoft.com"
-OWNER_INFO          = "tstgrp"
-PLATFORM            = "azk8s"
-SPONSOR_INFO        = "BizDev"
-REGION              = "centralus"
-HUB_VNET_ADDR_SPACE = ["192.168.0.0/24"]
-HUB_SUBNET_NAMES = {
-  AzureFirewallSubnet = "192.168.0.0/26"
-}
+CLUSTER_ID      = "tst2"
+COST_CENTER     = "RC8765"
+DEPLOY_TYPE     = "AKS_WCNP"
+ENVIRONMENT     = "PROD"
+NOTIFY_LIST     = "mngrs@microsoft.com"
+OWNER_INFO      = "tstgrp"
+PLATFORM        = "azk8s"
+SPONSOR_INFO    = "BizDev"
+REGION          = "centralus"
 DOCKER_REGISTRY = "ejvlab.azurecr.io"
+HUB_VNET_NAME   = "hubvnet"
+HUB_RG_NAME     = "rg-tst1-hub"
+AZFW_NAME       = "hubazfw-centralus"
+AZFW_PIP_NAME   = "azfwpip"
 AKS_VNET_NAME   = "aks-vnet-centralus-001"
-AKS_VNET_CIDR   = ["172.20.0.0/16"]
+AKS_VNET_CIDR   = ["172.21.0.0/16"]
 AKS_SUBNET_NAMES = {
-  aks-subnet = "172.20.0.0/21"
+  aks-subnet = "172.21.0.0/21"
 }
 ADMIN_USER = "ejvuser"
 K8S_VER    = "1.16.7"
