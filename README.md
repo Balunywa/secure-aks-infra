@@ -10,7 +10,11 @@ The repository contains the building blocks to create a secure Azure Kubernetes 
 
 The Terraform templates are organized using terraform modules. This allows to compose the infrastructure components requiredbased on organizational needs. The two built scenarios provided are meant to be a turn-key solution for each scenario.
 
-Scenario 1 can be found [here](./src/scenario1/main.tf). The scenario outline is as follows:
+Scenario 1 can be found [here](./src/scenario1/main.tf).
+
+![Architecture Overview](./kubenet_secure.png)
+
+The scenario outline is as follows:
 
 * Azure Resource Group for AKS with the following resources
 
@@ -37,7 +41,6 @@ Scenario 1 can be found [here](./src/scenario1/main.tf). The scenario outline is
   * (Optional) Azure AD integrated RBAC as outlined in <https://docs.microsoft.com/en-us/azure/aks/azure-ad-integration>
   * The AKS Created UDR for kubenet is updated with a new route of 0.0.0.0/0 to the internal IP of the AZ Firewall in the peered hub Vnet and assigned to the AKS subnet.
 
-![Architecture Overview](./kubenet_secure.png)
 
 ## Prerequisites
 
