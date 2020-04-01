@@ -2,6 +2,8 @@
 
 ## Prequiste Check
 
+Mac OS, Linux or WSL shell is required to work seamlessly
+
 Verify the following tools are installed:
 
 * Azure CLI 2.2.0+ ([download](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest))
