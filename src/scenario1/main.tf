@@ -103,6 +103,7 @@ module "vnet-peer" {
   AKS_RG_NAME   = azurerm_resource_group.aksrg.name
   AKS_VNET_NAME = module.aks-net.aks_vnet_name
   HUB_VNET_ID   = module.fw-net.hub_vnet_id
+  CLUSTER_ID       = var.CLUSTER_ID
   DEPENDENCY    = [module.aks-net.depended_on, module.fw-net.depended_on]
 }
 
@@ -182,12 +183,13 @@ module "post-aks-kube" {
   AKS_RG_NAME      = azurerm_resource_group.aksrg.name
   AKS_VNET_NAME    = var.AKS_VNET_NAME
   AKS_SUBNET_NAME  = module.aks-net.subnet_name[0]
-  AZFW_PRIVIP      = module.azfw.azfw_PrivIP
+  AZFW_PRIV_IP     = module.azfw.azfw_PrivIP
   TF_CLIENT_SECRET = var.TFUSER_CLIENT_SECRET
   TF_CLIENT_ID     = var.TFUSER_CLIENT_ID
   TF_TENANT_ID     = var.TENANT_ID
   AKS_API_FQDN     = module.aks-kube.api_fqdn
   AZFW_NAME        = module.azfw.azfw_name
   AZFW_RG_NAME     = azurerm_resource_group.hubrg.name
+  CLUSTER_ID       = var.CLUSTER_ID
   DEPENDENCY       = [module.aks-kube.depended_on]
 }
